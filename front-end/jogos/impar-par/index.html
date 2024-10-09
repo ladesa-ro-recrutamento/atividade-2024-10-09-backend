@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>jogo do impar par</title>
+
+    <link rel="stylesheet" href="../../assets/css/geral.css" />
+    <link rel="stylesheet" href="./css/ui.css" />
+
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="../../index.html">Início</a></li>
+
+          <li class="breadcrumb-item"><a>Jogos</a></li>
+
+          <li class="breadcrumb-item active" aria-current="page">
+            Impar ou Par
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <main>
+      <div
+        class="container px-2 px-md-4 py-5"
+        id="app"
+        style="max-width: 100%; overflow: hidden"
+      >
+        <form @submit.prevent="handleSubmit">
+          <div
+            class="card p-4"
+            style="width: max-content; max-width: 100%; overflow: hidden"
+          >
+            <h2 class="text-center h4 font-weight-bold mb-4">jogo do bicho</h2>
+
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <th class="align-middle text-center px-2 px-sm-4 py-2">
+                    escolha
+                  </th>
+
+                  <td class="align-middle px-2 py-2">
+                    <div class="btn-group w-100">
+                      <input
+                        type="radio"
+                        required
+                        class="btn-check"
+                        name="escolha"
+                        id="escolha-impar"
+                        value="impar"
+                        v-model="formState.escolha"
+                      />
+
+                      <label
+                        class="btn btn-outline-primary"
+                        style="flex: 1"
+                        for="escolha-impar"
+                      >
+                        impar
+                      </label>
+
+                      <input
+                        type="radio"
+                        required
+                        class="btn-check"
+                        name="escolha"
+                        id="escolha-par"
+                        value="par"
+                        v-model="formState.escolha"
+                      />
+                      <label
+                        class="btn btn-outline-primary"
+                        style="flex: 1"
+                        for="escolha-par"
+                      >
+                        par
+                      </label>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th class="align-middle text-center px-2 px-sm-4 py-2">
+                    número escolhido
+                  </th>
+
+                  <td class="align-middle px-2 py-2">
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                      "
+                    >
+                      <span v-show="false"> - </span>
+                      <span style="display: none" v-show="true">
+                        {{ formState.escolhaNumero }}
+                      </span>
+
+                      <input
+                        class="form-range"
+                        type="range"
+                        :min="JOGO.range.min"
+                        :max="JOGO.range.max"
+                        :step="JOGO.range.step"
+                        v-model="formState.escolhaNumero"
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th class="align-middle text-center px-2 px-sm-4 py-2">
+                    backend
+                  </th>
+                  <td class="align-middle px-2 py-2">
+                    <select class="form-select" v-model="formState.backend">
+                      <option value="navegador">navegador</option>
+                      <option value="api">api</option>
+                      <option value="danilo">danilo (nível hard)</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div>
+              <button type="submit" class="btn btn-primary w-100">
+                play (jogar)
+              </button>
+            </div>
+
+            <hr class="my-4" />
+
+            <div>
+              <div
+                v-if="status.situacao === null"
+                role="alert"
+                class="alert alert-light mb-0 text-center"
+              >
+                realize a sua primeira jogada!
+              </div>
+
+              <div
+                style="display: none"
+                v-show="true"
+                v-if="status.situacao === 'sucesso'"
+              >
+                <div
+                  v-if="status.meta.resultado.vencedor==='usuario'"
+                  role="alert"
+                  class="alert alert-success mb-0 text-center"
+                >
+                  parabens por fazer o basico de ganhar
+                </div>
+
+                <div
+                  v-else-if="status.meta.resultado.vencedor==='computador'"
+                  role="alert"
+                  class="alert alert-warning mb-0 text-center"
+                >
+                  perdeukkkkkkkkkkkkkkkkk
+                </div>
+
+                <div>
+                  <table class="table table-bordered joguskas mb-0 mt-2">
+                    <thead>
+                      <tr
+                        :class="{'table-success': status.meta.resultado.vencedor === 'usuario', 'table-warning': status.meta.resultado.vencedor === 'computador' }"
+                      >
+                        <th>jogador</th>
+                        <th>valor</th>
+                        <th>opção</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        :class="{ 'table-success': status.meta.resultado.vencedor === 'usuario'}"
+                      >
+                        <td class="align-middle">usuario</td>
+
+                        <td>
+                          <span class="badge rounded-pill text-bg-light">
+                            {{ status.meta.resultado.jogador.numero }}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            class="badge rounded-pill text-bg-secondary"
+                            :class="{ 'text-bg-success': status.meta.resultado.vencedor === 'usuario' }"
+                          >
+                            {{ status.meta.resultado.jogador.escolha }}
+                          </span>
+                        </td>
+                      </tr>
+
+                      <tr
+                        :class="{ 'table-warning': status.meta.resultado.vencedor === 'computador' }"
+                      >
+                        <td class="align-middle">computador</td>
+
+                        <td>
+                          <span class="badge rounded-pill text-bg-light">
+                            {{ status.meta.resultado.computador.numero }}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            class="badge rounded-pill text-bg-secondary"
+                            :class="{ 'text-bg-success': status.meta.resultado.vencedor === 'computador' }"
+                          >
+                            {{ status.meta.resultado.computador.escolha }}
+                          </span>
+                        </td>
+                      </tr>
+
+                      <tr
+                        :class="{'table-success': status.meta.resultado.vencedor === 'usuario', 'table-warning': status.meta.resultado.vencedor === 'computador' }"
+                      >
+                        <td class="align-middle">soma</td>
+
+                        <td>
+                          <span class="badge rounded-pill text-bg-light">
+                            {{ status.meta.resultado.soma }}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span class="badge rounded-pill text-bg-success">
+                            {{ status.meta.resultado.escolhaCerta }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div
+                style="display: none"
+                v-show="true"
+                v-if="status.situacao === 'erro'"
+              >
+                <div role="alert" class="alert alert-danger mb-0 text-center">
+                  quebroukkkkkkkkkkkkkkkkkkkkkk
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div>
+          <div
+            class="bomba"
+            style="display: none"
+            v-show="status.situacao === 'erro'"
+          >
+            <marquee>
+              <pre class="mb-0">{{ status.meta.mensagem }}</pre>
+            </marquee>
+
+            <img src="./img/image.png" alt="xiii" />
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <div class="alert alert-secondary">
+            <details open>
+              <summary>debug (para nerdolas)</summary>
+
+              <div class="card p-2 mt-2">
+                <pre
+                  style="display: none"
+                  v-show="true"
+                ><code>{{ JSON.stringify({ formState, status }, null, 2) }}</code></pre>
+
+                <pre v-show="false"><code>{}</code></pre>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script lang="text/javascript" type="module">
+      import { jogar } from "./js/backends.mjs";
+      import { ref, reactive, createApp } from "vue";
+
+      createApp({
+        setup() {
+          const JOGO = {
+            range: {
+              min: -19,
+              max: 19,
+              step: 0.25,
+            },
+          };
+
+          const formState = reactive({
+            escolha: null,
+            escolhaNumero: 0,
+            backend: "navegador",
+          });
+
+          const status = reactive({
+            situacao: null, // erro | sucesso | carregando
+            meta: {},
+          });
+
+          const executarJogada = async () => {
+            if (
+              Number.parseFloat(Number.parseInt(formState.escolhaNumero)) !==
+              Number.parseFloat(formState.escolhaNumero)
+            ) {
+              alert("page a versao premium para poder usar numeros quebrados");
+              return;
+            }
+
+            status.situacao = null;
+            status.meta = {};
+
+            const jogadaUsuario = {
+              escolha: formState.escolha,
+              numero: formState.escolhaNumero,
+            };
+
+            console.log("executando jogada", { jogadaUsuario });
+
+            status.situacao = "carregando";
+
+            try {
+              const resultado = await jogar(formState.backend, jogadaUsuario);
+
+              status.situacao = "sucesso";
+
+              status.meta = {
+                resultado,
+              };
+            } catch (error) {
+              console.log("errokkkk", { error });
+
+              status.situacao = "erro";
+
+              status.meta = {
+                mensagem: [
+                  "deu algum erro menorkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+                  "fudeu e agora",
+                  "talvez vc veja algo no console do navegador",
+                  "quem foi o otario que fez essa merda pode despedir ja",
+                  "manokKKKKKKKKKKKKKKKKKKKKKKKKKK COMO QUE ALGUEM FAZ UM PROGRAMA QUE NÃO FUNCIONA",
+                ].join("                                       "),
+              };
+            }
+          };
+
+          const handleSubmit = () => {
+            executarJogada();
+          };
+
+          return {
+            JOGO,
+            status,
+            formState,
+            handleSubmit,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

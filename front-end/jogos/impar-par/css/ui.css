@@ -1,0 +1,54 @@
+form {
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 1rem;
+}
+
+.bomba:not([hidden]) {
+  margin: 1rem auto;
+
+  display: flex;
+  justify-content: center;
+
+  border: 1px solid red;
+  background-color: rgba(255, 0, 0, 0.24);
+
+  border-radius: 0.75rem;
+
+  padding: 1rem;
+
+  gap: 0.25rem;
+
+  img {
+    max-width: 5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  marquee {
+    display: flex;
+    align-items: end;
+    padding-bottom: 2px;
+
+    pre {
+      font-style: italic;
+      line-height: normal;
+    }
+  }
+}
+
+.joguskas {
+  text-align: center;
+
+  td > * {
+    display: flex;
+    margin: 0 auto;
+    width: min-content;
+  }
+}
